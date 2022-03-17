@@ -29,7 +29,10 @@
 </template>
 
 <script>
+  import badgeMix from '@/mixins/tabbar-badge.js'
+  
   export default {
+    mixins: [badgeMix],
     data() {
       return {
         // 当前设备屏幕可使用高度

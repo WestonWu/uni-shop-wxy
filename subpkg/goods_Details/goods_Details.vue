@@ -35,17 +35,37 @@
 </template>
 
 <script>
+  import {
+    mapState,
+    mapMutations,
+    mapGetters
+  } from 'vuex'
   export default {
+    computed: {
+      ...mapState('m_cart', []),
+      ...mapGetters('m_cart', ['total'])
+    },
+    watch: {
+      total: {
+        handler(newVal) {
+          const findResult = this.options.find(x => x.text === '购物车')
+          if (findResult) {
+            findResult.info = newVal
+          }
+        },
+        immediate: true
+      }
+    },
     data() {
       return {
-        goods_Info: [],
+        goods_Info: {},
         options: [{
           icon: 'shop',
           text: '店铺'
         }, {
           icon: 'cart',
           text: '购物车',
-          info: 2
+          info: 0
         }],
         // 右侧按钮组的配置对象
         buttonGroup: [{
@@ -64,9 +84,24 @@
     onLoad(options) {
       const goods_id = options.goods_id
       this.getGoodsDetail(goods_id)
-
     },
     methods: {
+      ...mapMutations('m_cart', ['addToCart']),
+      buttonClick(e) {
+        if (e.content.text === '加入购物车') {
+          // 初始商品信息对象，然后调用addToCart
+          // goods_id, goods_name, goods_price, goods_count, goods_small_logo, goods_state
+          const goods = {
+            goods_id: this.goods_Info.goods_id,
+            goods_name: this.goods_Info.goods_name,
+            goods_price: this.goods_Info.goods_price,
+            goods_count: 1,
+            goods_small_logo: this.goods_Info.goods_small_logo,
+            goods_state: true,
+          }
+          this.addToCart(goods)
+        }
+      },
       async getGoodsDetail(goods_id) {
         const {
           data: res
@@ -85,9 +120,9 @@
           urls: this.goods_Info.pics.map(x => x.pics_big)
         })
       },
-      onClick(e){
+      onClick(e) {
         // console.log(e)
-        if(e.content.text === '购物车') {
+        if (e.content.text === '购物车') {
           uni.switchTab({
             url: '../../pages/car/car'
           })
@@ -111,8 +146,8 @@
   .goods-info-box {
     padding: 10px;
     padding-right: 0;
-  
-  .price {
+
+    .price {
       color: #c00000;
       font-size: 18px;
       margin: 10px 0;
